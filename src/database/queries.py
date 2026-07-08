@@ -1,8 +1,9 @@
 """
- queries.py
+queries.py
 
- Contains SQL query helper functions for inserting packet data into PostgreSQL
+Contains SQL query helper functions for inserting packet data into PostgreSQL.
 """
+
 
 def insert_packet_event(connection, packet):
     """
