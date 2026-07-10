@@ -1,14 +1,22 @@
 # Overall project architecture
-Network Interface
+
+**Network Interface**
+
         ↓
-PyShark Packet Capture
+**PyShark Packet Capture**
+
         ↓
-Kafka Producer
+**Kafka Producer**
+
         ↓
-Kafka Topic: network-packets
+**Kafka Topic: network-packets**
+
         ↓
-Python Consumer
+**Python Consumer**
+
         ↓
-PostgreSQL
+
+**PostgreSQL**
+
         ↓
-Grafana Dashboard
+**Grafana Dashboard**
