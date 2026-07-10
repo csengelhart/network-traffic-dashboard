@@ -1,4 +1,4 @@
-# Overall project architecture
+# Overall Project Architecture
 
 **Network Interface**
 
