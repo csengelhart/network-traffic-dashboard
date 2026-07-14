@@ -186,3 +186,118 @@ def insert_port_activity(connection, window_start, window_end, dst_port, protoco
         cursor.execute(query, values)
 
     connection.commit()
+
+def insert_security_alert(
+    connection,
+    alert_timestamp,
+    alert_type,
+    severity,
+    source_ip,
+    destination_ip,
+    destination_port,
+    description
+):
+    """
+    Inserts one detected security alert into PostgreSQL.
+    """
+
+    query = """
+        INSERT INTO security_alerts (
+            alert_timestamp,
+            alert_type,
+            severity,
+            source_ip,
+            destination_ip,
+            destination_port,
+            description
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s);
+    """
+
+    values = (
+        alert_timestamp,
+        alert_type,
+        severity,
+        source_ip,
+        destination_ip,
+        destination_port,
+        description
+    )
+
+    with connection.cursor() as cursor:
+        cursor.execute(query, values)
+
+    connection.commit()
+
+def get_known_device(connection, ip_address):
+    """
+    Returns a known device record for an IP address, or None if it is new.
+    """
+
+    query = """
+        SELECT device_id, ip_address, first_seen, last_seen
+        FROM known_devices
+        WHERE ip_address = %s;
+    """
+
+    with connection.cursor() as cursor:
+        cursor.execute(query, (ip_address,))
+        return cursor.fetchone()
+
+def insert_known_device(connection, ip_address, first_seen):
+    """
+    Inserts a newly observed IP address into the known_devices table.
+    """
+
+    query = """
+        INSERT INTO known_devices (
+            ip_address,
+            first_seen,
+            last_seen
+        )
+        VALUES (%s, %s, %s);
+    """
+
+    with connection.cursor() as cursor:
+        cursor.execute(query, (ip_address, first_seen, first_seen))
+
+    connection.commit()
+
+def update_device_last_seen(connection, ip_address, last_seen):
+    """
+    Updates the last observed timestamp for a known device.
+    """
+
+    query = """
+        UPDATE known_devices
+        SET last_seen = %s
+        WHERE ip_address = %s;
+    """
+
+    with connection.cursor() as cursor:
+        cursor.execute(query, (last_seen, ip_address))
+
+    connection.commit()
+
+def get_recent_average_packet_rate(connection, before_time, limit=5):
+    """
+    Returns the average packet rate from recent completed traffic windows.
+    """
+
+    query = """
+        SELECT AVG(packets_per_second)
+        FROM (
+            SELECT packets_per_second
+            FROM traffic_metrics
+            WHERE window_end < %s
+            ORDER BY window_end DESC
+            LIMIT %s
+        ) AS recent_windows;
+    """
+
+    with connection.cursor() as cursor:
+        cursor.execute(query, (before_time, limit))
+        result = cursor.fetchone()
+
+    return float(result[0]) if result and result[0] is not None else None
+
