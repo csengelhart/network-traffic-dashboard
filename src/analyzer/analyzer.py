@@ -23,6 +23,13 @@ from src.database.queries import (
     insert_top_talker,
     insert_port_activity,
 )
+from src.analyzer.alerts import (
+    detect_excessive_packet_rate,
+    detect_new_devices,
+    detect_port_scans,
+    detect_traffic_spike,
+)
+
 
 WINDOW_SECONDS = 60
 TOP_N = 10
@@ -117,6 +124,31 @@ def analyze_time_window(connection, window_start, window_end):
             values["packet_count"],
             values["total_bytes"]
         )
+
+        # Run rule-based security detections.
+    detect_new_devices(
+        connection=connection,
+        packets=packets
+    )
+
+    detect_traffic_spike(
+        connection=connection,
+        window_start=window_start,
+        window_end=window_end,
+        packet_count=packet_count
+    )
+
+    detect_excessive_packet_rate(
+        connection=connection,
+        packets=packets,
+        window_end=window_end
+    )
+
+    detect_port_scans(
+        connection=connection,
+        packets=packets,
+        window_end=window_end
+    )
 
     print(f"Analyzed {packet_count} packets from {window_start} to {window_end}.")
 
