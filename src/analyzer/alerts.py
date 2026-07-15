@@ -17,9 +17,12 @@ from src.database.queries import (
 )
 
 # Alert thresholds
-TRAFFIC_SPIKE_MULTIPLIER = 3
-EXCESSIVE_PACKET_THRESHOLD = 200
-PORT_SCAN_THRESHOLD = 20
+from src.config import (
+    EXCESSIVE_PACKET_THRESHOLD,
+    PORT_SCAN_THRESHOLD,
+    TRAFFIC_SPIKE_MULTIPLIER,
+)
+
 
 def is_local_address(ip_address):
     """

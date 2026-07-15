@@ -29,10 +29,11 @@ from src.analyzer.alerts import (
     detect_port_scans,
     detect_traffic_spike,
 )
+from src.config import (
+    ANALYSIS_WINDOW_SECONDS,
+    TOP_N_RESULTS,
+)
 
-
-WINDOW_SECONDS = 60
-TOP_N = 10
 
 
 def analyze_time_window(connection, window_start, window_end):
@@ -93,7 +94,7 @@ def analyze_time_window(connection, window_start, window_end):
         src_ip_summary.items(),
         key=lambda item: item[1]["total_bytes"],
         reverse=True
-    )[:TOP_N]
+    )[:TOP_N_RESULTS]
 
     # store top talker in the top_talkers table
     for src_ip, values in top_sources:
@@ -110,7 +111,7 @@ def analyze_time_window(connection, window_start, window_end):
         port_summary.items(),
         key=lambda item: item[1]["packet_count"],
         reverse=True
-    )[:TOP_N]
+    )[:TOP_N_RESULTS]
 
     # loop through each top port/protocol pair and
     # store port activity in the port_activity table
@@ -161,7 +162,7 @@ def main():
 
     # set start and end of analysis window to current UTC time
     window_end = datetime.now(timezone.utc)
-    window_start = window_end - timedelta(seconds=WINDOW_SECONDS)
+    window_start = window_end - timedelta(seconds=ANALYSIS_WINDOW_SECONDS)
 
     try:
         analyze_time_window(connection, window_start, window_end)
